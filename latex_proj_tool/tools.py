@@ -34,7 +34,7 @@ class TexVisitor:
     """
 
     input_pattern = re.compile(r"\\input{(.*)}")
-
+    include_pattern = re.compile(r"\\include{(.*)}")
     def __init__(self, root_file_name: str):
         if root_file_name.find(" ") != -1:
             raise ValueError(f"Do not support file path with spaces: {root_file_name}")
@@ -62,8 +62,14 @@ class TexVisitor:
                 if line.strip().startswith("%"):
                     continue
                 match = self.input_pattern.search(line)
+                match2 = self.include_pattern.search(line)
                 if match:
                     input_file = match.group(1)
+                    input_file += "" if input_file.endswith("tex") else ".tex"
+                    self.visit(os.path.join(self.root_path, input_file))
+                elif match2:
+                    input_file = match2.group(1)
+                    print(f'MATCH2: inputfile {input_file}')
                     input_file += "" if input_file.endswith("tex") else ".tex"
                     self.visit(os.path.join(self.root_path, input_file))
                 else:
